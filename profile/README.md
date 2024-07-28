@@ -1,6 +1,6 @@
 # 🐙 usepolvo
 
-**usepolvo** is an open-source Integration Platform as a Service (iPaaS) solution designed to provide an easy way to integrate with third-party apps like Stripe, HubSpot, and Salesforce using standardized requests and responses regardless of the provider. You get advanced features including asynchronous support, intelligent rate limiting, efficient caching, robust logging, and secure storage—all included.
+**usepolvo** is an open-source Integration Platform as a Service (iPaaS) for developers solution designed to provide an easy way to integrate with third-party apps like Stripe, HubSpot, and Salesforce using standardized requests and responses regardless of the provider. You get advanced features including asynchronous support, intelligent rate limiting, efficient caching, robust logging, and secure storage—all included.
 
 ## Goals
 
