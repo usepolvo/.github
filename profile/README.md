@@ -1,6 +1,6 @@
-# 🐙 usepolvo
+# 🐙 polvo
 
-usepolvo is an open-source API integration toolkit that simplifies how developers interact with third-party services. Our mission is to streamline the process of integrating multiple APIs into your applications, allowing you to focus on building features rather than wrestling with integration complexities.
+polvo is an open-source API integration toolkit that simplifies how developers interact with third-party services. Our mission is to streamline the process of integrating multiple APIs into your applications, allowing you to focus on building features rather than wrestling with integration complexities.
 
 ## 🌟 Key Features
 
@@ -15,7 +15,7 @@ usepolvo is an open-source API integration toolkit that simplifies how developer
 
 ## 🚀 Getting Started
 
-1. Install usepolvo:
+1. Install polvo:
    ```
    pip install usepolvo
    ```
@@ -47,7 +47,7 @@ YATL is our innovative, octopus-themed markup language designed for defining and
 
 Learn more about YATL in our [YATL Documentation](https://docs.usepolvo.com/yatl).
 
-## 🐙 Why Choose usepolvo?
+## 🐙 Why Choose polvo?
 
 1. **Simplicity**: Reduce the complexity of working with multiple APIs.
 2. **Consistency**: Use the same patterns across different integrations.
@@ -57,7 +57,7 @@ Learn more about YATL in our [YATL Documentation](https://docs.usepolvo.com/yatl
 
 ## 🛠 Supported Integrations
 
-Currently, usepolvo supports integrations with:
+Currently, polvo supports integrations with:
 
 - Stripe
 - HubSpot
@@ -72,6 +72,6 @@ We welcome contributions from the community! Whether it's adding new integration
 
 ## 📄 License
 
-usepolvo is released under the [MIT License](https://github.com/usepolvo/usepolvo/blob/main/LICENSE).
+polvo is released under the [MIT License](https://github.com/usepolvo/usepolvo/blob/main/LICENSE).
 
 Join us in simplifying and modernizing API integrations, empowering developers to build better, faster, and more efficient software!
