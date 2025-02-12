@@ -42,7 +42,7 @@ Integrations currently available:
 - **Identity Verification**: Certn
 - **Payment Processing**: Stripe
 
-View our [integration roadmap](https://github.com/usepolvo/usepolvo/blob/main/ROADMAP.md) for upcoming additions.
+View our [integration roadmap](https://github.com/usepolvo/polvo/blob/main/ROADMAP.md) for upcoming additions.
 
 ## Why Polvo?
 
@@ -66,16 +66,16 @@ View our [integration roadmap](https://github.com/usepolvo/usepolvo/blob/main/RO
 
 ## Contributing
 
-We welcome contributions from our community! Whether you're fixing bugs, improving documentation, or adding new integrations, check our [Contributing Guidelines](https://github.com/usepolvo/polvo-python/blob/main/CONTRIBUTING.md) to get started.
+We welcome contributions from our community! Whether you're fixing bugs, improving documentation, or adding new integrations, check our [Contributing Guidelines](https://github.com/usepolvo/polvo/blob/main/CONTRIBUTING.md) to get started.
 
 ## Resources
 
 - [Documentation](https://docs.usepolvo.com)
-- [Examples](https://github.com/polvo-python/examples)
+- [Python SDK Examples](https://github.com/polvo-python/examples)
 
 ## License
 
-Polvo is released under the [MIT License](https://github.com/usepolvo/polvo-python/blob/main/LICENSE.txt).
+Polvo is released under the [MIT License](https://github.com/usepolvo/polvo/blob/main/LICENSE).
 
 ---
 
