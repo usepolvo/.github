@@ -71,7 +71,7 @@ We welcome contributions from our community! Whether you're fixing bugs, improvi
 ## Resources
 
 - [Documentation](https://docs.usepolvo.com)
-- [Python SDK Examples](https://github.com/usepolvo/polvo-python/examples)
+- [Python SDK Examples](https://github.com/usepolvo/polvo-python/blob/main/examples)
 
 ## License
 
