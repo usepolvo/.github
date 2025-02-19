@@ -1,19 +1,20 @@
 # 🐙 Polvo
 
-Polvo is an enterprise-grade API integration toolkit that revolutionizes how developers connect with third-party services. Built for modern development teams, Polvo eliminates integration complexity so you can focus on building features that matter.
+Polvo is an intelligent API integration toolkit that revolutionizes how developers connect with third-party services. Whether you're building traditional integrations or AI-powered applications, Polvo eliminates complexity so you can focus on features that matter.
 
 ## Features
 
-### Core Capabilities
+### Brain System
+- **AI-Powered Integration**: Build intelligent applications that interact with APIs using natural language
+- **Context Management**: Smart memory system for maintaining conversation state
+- **Multi-Service Orchestration**: Seamlessly coordinate multiple API services
+- **LLM Integration**: Built-in support for the most advanced LLM models available
 
-- **Unified Async Interface**: Write clean, consistent code across different APIs using modern async patterns
-- **Intelligent Authentication**: Seamless handling of OAuth, API keys, and other auth methods with automatic token refresh
-- **Advanced Rate Limiting**: Smart request throttling with configurable strategies and automatic retry handling
-- **Universal Pagination**: Consistent data retrieval patterns that abstract away API-specific implementation details
-- **Enterprise Error Handling**: Standardized error types with detailed context for better debugging and reliability
-- **Secure Webhook Management**: Production-ready webhook handling with automatic signature verification and replay protection
-- **Performance-Optimized Caching**: Configurable caching strategies to reduce API calls and improve response times
-- **Observability**: Comprehensive logging and monitoring capabilities for production deployments
+### Tentacle Framework
+- **Unified Async Interface**: Clean, consistent patterns across different APIs
+- **Intelligent Authentication**: Seamless OAuth, JWT, and API key handling
+- **Smart Rate Limiting**: Automatic request throttling and retry logic
+- **Type Safety**: Full Pydantic integration for reliable data handling
 
 ## Quick Start
 
@@ -22,61 +23,74 @@ Polvo is an enterprise-grade API integration toolkit that revolutionizes how dev
 pip install usepolvo
 ```
 
-2. Initialize your client:
+2. Traditional API Integration:
 ```python
-from usepolvo.tentacles.stripe import StripeClient
+from usepolvo.tentacles.hubspot import HubSpotClient
 
-async with StripeClient() as client:
-    customers = await client.customers.list()
+# Use the Tentacle framework
+client = HubSpotClient()
+contacts = await client.contacts.list()
 ```
 
-3. Start building with our [comprehensive documentation](https://docs.usepolvo.com).
+3. AI-Powered Integration:
+```python
+from usepolvo.brain import create_brain
+from usepolvo.tentacles.hubspot import HubSpotClient
+
+# Create an intelligent assistant
+brain = await create_brain(
+    name="CRM Assistant",
+    tentacles=[HubSpotClient()]
+)
+
+# Natural language interaction
+response = await brain.process(
+    "Update john@example.com's phone number to +1-555-0123"
+)
+```
 
 ## Supported Integrations
 
-Integrations currently available:
-
-- **AI & ML**: Claude, Gemini, OpenAI
-- **Analytics**: Linear
-- **CRM**: HubSpot, Salesforce
-- **Identity Verification**: Certn
-- **Payment Processing**: Stripe
-
-View our [integration roadmap](https://github.com/usepolvo/polvo/blob/main/ROADMAP.md) for upcoming additions.
+Currently available:
+- **Business Tools**: HubSpot
+- **AI & ML**: Claude
+- **Data & APIs**: OpenMeteo
+- More coming soon!
 
 ## Why Polvo?
 
 ### For Engineers
-- Write cleaner, more maintainable integration code
-- Reduce boilerplate and common integration pitfalls
-- Battle-tested in production environments
-- Comprehensive type safety with modern IDE support
+- Choose between code-first or AI-powered integration
+- Write clean, maintainable integration code
+- Full type safety and modern IDE support
+- Built-in best practices for security and performance
 
 ### For Teams
-- Standardized patterns across all integrations
-- Reduced onboarding time for new team members
-- Built-in best practices for security and performance
-- Active community for support and knowledge sharing
+- Standardized patterns across integrations
+- Reduced onboarding time
+- Active community support
+- Comprehensive documentation
 
 ### For Organizations
+- Faster time-to-market
 - Lower maintenance overhead
-- Faster time-to-market for new features
-- Reduced integration-related technical debt
-- Enterprise-ready with security and compliance in mind
+- Future-ready architecture
+- Enterprise-grade security
+
+## Documentation
+
+- [Getting Started](https://docs.usepolvo.com)
+- [API Reference](https://docs.usepolvo.com/api)
+- [Examples](https://github.com/usepolvo/examples)
 
 ## Contributing
 
-We welcome contributions from our community! Whether you're fixing bugs, improving documentation, or adding new integrations, check our [Contributing Guidelines](https://github.com/usepolvo/polvo/blob/main/CONTRIBUTING.md) to get started.
-
-## Resources
-
-- [Documentation](https://docs.usepolvo.com)
-- [Python SDK Examples](https://github.com/usepolvo/polvo-python/blob/main/examples)
+We welcome contributions! Check our [Contributing Guidelines](CONTRIBUTING.md) to get started.
 
 ## License
 
-Polvo is released under the [MIT License](https://github.com/usepolvo/polvo/blob/main/LICENSE).
+MIT License - see [LICENSE](LICENSE) for details.
 
 ---
 
-Built with ❤️ by developers, for developers.
+Built with 💜 in Brazil
