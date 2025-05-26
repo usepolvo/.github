@@ -1,149 +1,104 @@
-# 🐙 Polvo – Eight arms. Infinite insight.
+# 🐙 Polvo (alpha)
 
-**Polvo** (**pōl·voh**, Portuguese for *octopus*) is the multi‑armed data & AI platform that grabs every source you need, enriches it with Retrieval‑Augmented Generation (RAG) super‑powers, and serves it back through an open MCP server you control.
-
-> **Elevator pitch (20 sec)**
-> *Plug in any database or SaaS, vector‑index it with one flag, and chat or automate actions over your fresh context – all from a single CLI.*
+**Grab a CSV. Talk to it in 60 seconds.**
+Polvo (Portuguese for *octopus*) is an open‑source micro‑stack that bulk‑loads a local CSV, turns every row into an OpenAI vector, and spins up a chat API—all from a single CLI.
+This is the **α‑MVP**: one source, one model, one command path. Perfect for proofs‑of‑concept; ready to sprout extra tentacles in future releases.
 
 ---
 
-### 1. Start PostgreSQL with pgvector
+## ⚡ Try it in 5 minutes
 
 ```bash
-docker run -d \
-  --name polvo-postgres \
-  -e POSTGRES_DB=polvo \
-  -e POSTGRES_USER=polvo \
-  -e POSTGRES_PASSWORD=polvo_password \
-  -p 5432:5432 \
-  pgvector/pgvector:pg16
+# 1  Spin up Postgres + runtime (Docker)
+git clone https://github.com/usepolvo/polvo-stack && cd polvo-stack
+cp env.example .env      # add your OPENAI_API_KEY
+docker compose up -d
+
+# 2  Install the CLI (Go binary)
+brew install usepolvo/tap/polvo   # or `go install github.com/usepolvo/polvo-cli@latest`
+
+# 3  Create a project & load a file
+polvo init demo
+polvo ingest data/faq.csv          # Polars ➜ PostgreSQL COPY
+polvo embed faq                    # batch‑embed 128 rows
+
+# 4  Chat with your data
+polvo serve --port 8000 &          # opens http://localhost:8000/docs
+polvo chat "How do I reset my password?"
 ```
 
-### 2. Start the MCP / Runtime server
+---
+
+## 🗺 What ships in the alpha
+
+| Piece                    | Status | Notes                                         |
+| ------------------------ | ------ | --------------------------------------------- |
+| **CSV → COPY loader**    | ✅      | 200 k rows/s via Polars & binary COPY         |
+| **Embeddings**           | ✅      | Synchronous batches, `text‑embedding‑3‑small` |
+| **Vector store**         | ✅      | Plain pgvector (L2 distance)                  |
+| **Chat & search API**    | ✅      | FastAPI + simple RAG prompt                   |
+| **CLI verbs**            | ✅      | `init · ingest · embed · serve · chat`        |
+| **OpenTelemetry traces** | ✅      | Console exporter on by default                |
+| Airbyte / dbt / Dagster  | ⏳      | Planned for β                                 |
+| HNSW ANN indexes         | ⏳      | Planned for β                                 |
+
+---
+
+## 🏗 Tiny mental model
+
+```
+CSV  ─▶  Polars loader  ─▶  PostgreSQL (COPY)  ─▶  OpenAI embeddings  ─▶  pgvector table  ─▶  /chat endpoint
+```
+
+Everything happens **in‑process** for now—fast enough for \~1 M rows on a laptop.  Future releases will add queues and workers.
+
+---
+
+## 🔧 Frequently‑used CLI flags
 
 ```bash
-cd polvo-runtime
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r requirements.txt
-uvicorn server.main:app --port 8787
-```
-
-### 3. Build the CLI
-
-```bash
-cd polvo-cli
-go build -o polvo .
-cd ..
-```
-
-### 4. Initialize a project & wire a source
-
-```bash
-./polvo-cli/polvo init my-project
-cd my-project
-
-# Add a CSV, Markdown folder, Postgres table… you name it
-../polvo-cli/polvo source add docs --driver csv --spec data/product_docs.csv
-
-# Crunch vectors & ask a question
-../polvo-cli/polvo run
-```
-
-### 5. Chat with your data
-
-Visit **[http://localhost:8787/chat](http://localhost:8787/chat)** and start asking away!
-
-</details>
-
----
-
-## 📂 Project Structure (generated)
-
-```
-my-project/
-├── polvo.yaml            # Central config
-├── data/                 # Raw files or mounted volumes
-│   └── product_docs.csv
-└── .env                  # Secrets & URLs
+polvo ingest <file.csv>           # --table, --id-column optional
+polvo embed <source>              # --model, --batch‑size 128
+polvo serve --port 8000           # default 0.0.0.0
+polvo chat "question"             # omit text for REPL‑style prompt
 ```
 
 ---
 
-## 🔧 Configuration (`polvo.yaml`)
+## 🤝 Use with your agent stack
 
-```yaml
-project: my_project
-
-# Where Polvo stores embeddings
-database:
-  provider: postgres
-  url: postgresql://polvo:polvo_password@localhost:5432/polvo
-
-sources:
-  - name: product_docs
-    driver: csv
-    spec: data/product_docs.csv
-    sync: full
-
-embedding:
-  table: documents
-  column: content
-  model: text-embedding-3-small
-  chunk_size: 1000
-  chunk_overlap: 200
-
-retriever:
-  k: 5        # Top‑K chunks
-  threshold: 0.7
+```python
+from langchain_postgres import PGVector
+store = PGVector.from_connection_string(
+    os.getenv("POLVO_DB_DSN"),
+    table_name="vector.docs")
 ```
 
----
-
-## 🛠️ CLI Cheatsheet
-
-| Command                | What it does                     |
-| ---------------------- | -------------------------------- |
-| `polvo init <project>` | Scaffold a new workspace         |
-| `polvo db create`      | Set up pgvector & tables         |
-| `polvo source add`     | Register a connector             |
-| `polvo run`            | Execute the full pipeline        |
-| `polvo chat`           | Open a TUI chat in your terminal |
+Need CrewAI?  `from polvo_tools.crewai import PGSearchTool` and drop it into your agent.
 
 ---
 
-## 🔌 API Endpoints (FastAPI)
+## 🔭 Roadmap (public)
 
-* `GET /health` – Liveness probe
-* `POST /v1/chat` – RAG chat completions
-* `POST /v1/tools/vector_search` – Semantic chunk search
-* `GET /mcp` – Natural‑language MCP server
+1. **β – Data fabric** : Airbyte sources, dbt transforms, async embedding workers, HNSW indexes.
+2. **v1 – Enterprise** : multi‑tenant, Grafana dashboards, SaaS wizard UI.
 
----
-
-## 🧪 Testing Your Setup
-
-```bash
-# Check DB
-psql "$POSTGRES_URL" -c "SELECT COUNT(*) FROM documents;"
-
-# Health probe
-curl http://localhost:8787/health
-
-# Vector search
-curl -X POST http://localhost:8787/v1/tools/vector_search \
-  -H "Content-Type: application/json" \
-  -d '{"query":"security features","k":3}'
-```
+Track progress in our [changelog](https://github.com/usepolvo/polvo-core/releases) and vote on features in GitHub Discussions.
 
 ---
 
-## 🌊 Philosophy
+## 🗂 Repo quick links
 
-Polvo is **curious**, **helpful**, **transparent**, and a bit **playful**. Every default is surfaced, every provider is swappable, and no black‑box SaaS stands between you and your data.
+* **polvo‑core** – FastAPI runtime & loader
+* **polvo‑cli** – CLI utility (Go)
+* **polvo‑stack** – Docker compose bundle
 
 ---
 
-## 🖋️ License
+## 📜 License
 
-MIT
+MIT.  The vectors—and your data—remain **yours**.
+
+---
+
+**Questions?**  Join our [Discord](https://discord.gg/polvo) or open an issue.
