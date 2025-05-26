@@ -12,7 +12,7 @@ Perfect for **Vertical AI applications** that need both traditional relational d
 
 **Web Interface (Recommended)**
 ```bash
-# Visit polvo.dev and:
+# Visit usepolvo.com and:
 # 1. Upload your CSV
 # 2. Review AI-generated schema recommendations  
 # 3. Test embedding models in the playground
