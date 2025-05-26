@@ -39,7 +39,7 @@ polvo chat "How do I reset my password?"
 | **Chat & search API**    | ✅      | FastAPI + simple RAG prompt                   |
 | **CLI verbs**            | ✅      | `init · ingest · embed · serve · chat`        |
 | **OpenTelemetry traces** | ✅      | Console exporter on by default                |
-| Airbyte / dbt / Dagster  | ⏳      | Planned for β                                 |
+| Ampersand / dbt / Dagster  | ⏳      | Planned for β                                 |
 | HNSW ANN indexes         | ⏳      | Planned for β                                 |
 
 ---
@@ -80,7 +80,7 @@ Need CrewAI?  `from polvo_tools.crewai import PGSearchTool` and drop it into you
 
 ## 🔭 Roadmap (public)
 
-1. **β – Data fabric** : Airbyte sources, dbt transforms, async embedding workers, HNSW indexes.
+1. **β – Data fabric** : Ampersand/Airbyte sources, dbt transforms, async embedding workers, HNSW indexes.
 2. **v1 – Enterprise** : multi‑tenant, Grafana dashboards, SaaS wizard UI.
 
 Track progress in our [changelog](https://github.com/usepolvo/polvo-core/releases) and vote on features in GitHub Discussions.
@@ -101,4 +101,4 @@ MIT.  The vectors—and your data—remain **yours**.
 
 ---
 
-**Questions?**  Join our [Discord](https://discord.gg/polvo) or open an issue.
+**Questions?**  Join our [Discord](https://discord.gg/7vcz73Nm) or open an issue.
