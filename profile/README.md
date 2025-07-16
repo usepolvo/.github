@@ -221,13 +221,3 @@ MIT License. Use it, fork it, sell it – just don't blame us if it breaks.
 Try this: Take your most complex API integration. The one with OAuth2, retry logic, rate limiting, and multi-tenant support. Replace it with Polvo. We bet you'll delete more code than you add.
 
 If not, open an issue. We'd love to know what we missed.
-```
-
-The key changes in these rewrites:
-
-1. **Lead with simple examples** - `polvo.get()` not `polvo.API()`
-2. **Sessions for advanced use** - Following requests' pattern
-3. **Explicit token storage** - No hidden magic
-4. **More Pythonic names** - `Session` not `API`, `retry=True` not complex objects
-5. **Progressive disclosure** - Simple first, then complex
-6. **Clear migration path** - From requests to polvo
