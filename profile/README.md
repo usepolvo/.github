@@ -1,299 +1,145 @@
-# 🐙 Polvo
+# Polvo 🐙
 
-**Stay ahead of the embedding model explosion**
+**The API integration toolkit that respects production realities**
 
-New embedding models launch every week. Yesterday's best model is today's legacy tech. Polvo continuously evaluates the latest models against YOUR specific data, ensuring you're always using the optimal embeddings—not just the ones that benchmarked well on generic datasets six months ago.
+## Why Another API Client?
 
----
+Let's be honest: most API client libraries fall into two camps:
 
-## The Problem
+1. **Too Simple**: Thin wrappers around HTTP libraries that leave you to handle OAuth flows, rate limiting, retries, and token storage yourself. Fine for demos, painful in production.
 
-The embedding landscape evolves at breakneck speed:
-- **January**: You deploy with `text-embedding-ada-002`
-- **March**: BGE-v1.5 launches with 20% better performance for half the cost
-- **May**: A domain-specific model appears that understands your data 40% better
-- **Today**: You're still using January's model, wasting money and getting worse results
+2. **Too Complex**: Enterprise service mesh solutions that require infrastructure changes, configuration management, and a PhD in distributed systems. Overkill for most teams.
 
-**Without Polvo**: You find out about better models through HackerNews comments months later.
+Polvo sits in the middle. It handles the patterns that cause **real pain in production** without requiring you to change how you build applications.
 
-**With Polvo**: Get notified within 48 hours when a new model beats yours on YOUR data.
+## The Problem We're Solving
 
----
+Every team building API integrations faces the same challenges:
 
-## Quick Start
+- **OAuth2 Token Management**: Tokens expire. Refresh tokens expire. Multiple tenants need different tokens. Most libraries make you handle this yourself.
+- **Rate Limiting**: APIs have limits. Good libraries respect them. Great libraries adapt to them automatically.
+- **Resilience**: Networks fail. Services go down. Retry logic with proper backoff should be built-in, not bolted on.
+- **Multi-tenancy**: SaaS applications need to manage credentials for multiple customers. This shouldn't require a database redesign.
+- **Security**: Tokens in plain text files or environment variables? That's a security audit waiting to happen.
 
-### Web Interface (Recommended)
+## Design Philosophy
 
-```bash
-1. Visit usepolvo.com
-2. Upload your dataset (CSV/JSON, 50+ examples)
-3. View current best model for your data
-4. Enable monitoring for automatic weekly updates
-```
-
-### CLI Tool
-
-```bash
-# Install
-pip install polvo-eval
-
-# One-time evaluation
-polvo test data.csv --models all
-
-# Continuous monitoring
-polvo monitor data.csv --notify slack --webhook YOUR_WEBHOOK
-```
-
----
-
-## Key Features
-
-### Continuous Model Tracking
-
-We monitor releases from:
-- **OpenAI** - New embedding models and updates
-- **Hugging Face** - Daily model releases (BGE, E5, etc.)
-- **Cohere** - Multilingual and domain updates
-- **Voyage AI** - Specialized models (code, law, finance)
-- **Google** - Gecko and upcoming models
-- **Anthropic** - When they inevitably release embeddings
-
-### Evaluation on YOUR Data
-
-Generic benchmarks lie. MTEB scores don't predict performance on your:
-- Legal contracts with specific terminology
-- Medical notes with domain jargon
-- E-commerce descriptions with brand names
-- Support tickets with company-specific context
-
-Polvo tests each model on YOUR actual data and use case.
-
-### Actionable Intelligence
-
-Not just scores—clear recommendations:
-
-```
-🚨 Model Alert - March 15, 2024
-
-New model available: mxbai-embed-large-v1
-Performance on your data:
-- 12% better retrieval accuracy
-- 30% faster inference
-- 100% free (vs $2,400/mo current)
-
-Recommendation: STRONG UPGRADE
-Estimated savings: $28,800/year
-
-[View detailed comparison] [Get migration code]
-```
-
----
-
-## How It Works
-
-### 1. Initial Setup (5 minutes)
+### 1. Progressive Disclosure
+Simple cases should be simple. Complex cases should be possible.
 
 ```python
-# Upload your data
-import polvo
+# Simple
+api = polvo.API("https://api.example.com")
+response = api.get("/users")
 
-client = polvo.Client(api_key="your-key")
-dataset = client.upload_dataset(
-    "product_descriptions.csv",
-    text_column="description"
+# Complex (but still readable)
+api = polvo.API(
+    "https://api.example.com",
+    auth=polvo.auth.oauth2(...),
+    retry=polvo.retry.exponential_backoff(),
+    rate_limit=polvo.rate_limit.adaptive()
 )
-
-# Run initial evaluation
-results = client.evaluate(dataset, models="auto")
-print(results.best_model)  # 'mxbai-embed-large-v1'
-print(results.savings)     # '$2,400/month vs OpenAI'
 ```
 
-### 2. Continuous Monitoring
+### 2. Batteries Included, But Replaceable
+We provide sensible defaults for everything, but you can swap out any component.
 
-```python
-# Enable weekly monitoring
-monitor = client.monitor(
-    dataset,
-    notify=["email", "slack"],
-    threshold=0.05  # Alert on 5% improvement
-)
+### 3. Production-First
+Every feature is designed with production use in mind. Encrypted token storage isn't an afterthought—it's the default.
 
-# Polvo now automatically:
-# - Tests new models every week
-# - Compares against your current model
-# - Alerts only when action needed
-```
+### 4. Familiar Interface
+If you know `requests` (Python) or `axios` (JavaScript), you already know 80% of Polvo.
 
-### 3. Smart Recommendations
+## What Makes Polvo Different?
 
-Polvo considers:
-- **Performance** - Retrieval accuracy on your data
-- **Cost** - API pricing vs self-hosted options
-- **Speed** - Inference time for your use case
-- **Compatibility** - Dimension changes, API availability
-- **Stability** - Model maturity and support
+### The OAuth2 "Crown Jewel"
+Our OAuth2 implementation isn't just another auth strategy. It's a complete solution for production OAuth2 flows:
+
+- **Automatic token refresh** before expiration
+- **Thread-safe** token management
+- **Multi-tenant** support out of the box
+- **Persistent storage** with encryption
+- **Graceful degradation** when storage fails
+
+### Adaptive Rate Limiting
+Instead of hard-coding rate limits, Polvo reads API response headers and adapts:
+
+- Reads `X-RateLimit-*` headers automatically
+- Adjusts request rate based on remaining quota
+- Prevents the thundering herd problem with jitter
+- Works with GitHub, Twitter, and custom header formats
+
+### Smart Retries
+Not all errors are worth retrying. Polvo knows the difference:
+
+- Retries network errors and 5xx responses
+- Respects `Retry-After` headers
+- Uses exponential backoff with jitter
+- Configurable per-request or globally
+
+## Language Support
+
+### Available Now
+- **Python**: Full-featured implementation (v2.0.0)
+  - `pip install usepolvo`
+
+### Coming Soon
+- **JavaScript/TypeScript**: In development
+- **Go**: Planned
+- **Rust**: Under consideration
+
+Each implementation follows the same design principles and provides a consistent interface across languages.
+
+## Trade-offs and Honest Limitations
+
+We believe in transparency. Here's what Polvo **doesn't** do:
+
+1. **Not a Service Mesh**: We don't handle service discovery, load balancing, or distributed tracing. Use Istio or Linkerd for that.
+
+2. **Not a Gateway**: We don't proxy requests or provide a central point of control. Each application instance manages its own connections.
+
+3. **Not Magic**: We can't make slow APIs fast or broken APIs work. We just handle the complexity around them.
+
+4. **Opinionated Defaults**: Our defaults prioritize security and reliability over performance. You can change them, but you need to opt-in to less secure options.
+
+## When Should You Use Polvo?
+
+✅ **Use Polvo when:**
+- You're integrating with multiple third-party APIs
+- You need OAuth2 with token refresh
+- You're building a multi-tenant SaaS application  
+- You want production-ready patterns without the complexity
+- You value security and reliability
+
+❌ **Don't use Polvo when:**
+- You only make occasional API calls
+- You need a full service mesh solution
+- You're building a high-frequency trading system (we prioritize reliability over microsecond latency)
+- You want to proxy or transform requests
+
+## Contributing
+
+We welcome contributions, but we're opinionated about our design principles:
+
+1. **Simplicity over features**: We'd rather do fewer things well
+2. **Production-first**: Every feature must consider production use
+3. **Consistent interface**: All language implementations should feel the same
+4. **No magic**: Behavior should be predictable and debuggable
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+
+## The Name
+
+"Polvo" means octopus in Portuguese. Like an octopus with multiple tentacles reaching out to different services, Polvo helps you integrate with multiple APIs. The original v1 took this metaphor too literally with its "Brain/Tentacles" architecture. v2 keeps the name but drops the complexity.
+
+## License
+
+MIT License - see [LICENSE](LICENSE) for details.
 
 ---
 
-## Example Results
+**Questions? Criticism? Ideas?**
 
-### E-commerce Product Search
+We built Polvo because we were tired of solving the same problems in every project. If you think we're wrong about something, we want to hear it. Open an issue and let's discuss.
 
-```
-Current: openai/text-embedding-ada-002
-Dataset: 50,000 product descriptions
-
-┏━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━┓
-┃ Model             ┃ Quality ┃ Speed ┃ Cost/mo ┃ Released  ┃
-┡━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━━┩
-│ voyage-large-2    │ 94%     │ 89ms  │ $1,200  │ Jan 2024  │
-│ mxbai-embed-large │ 93%     │ 71ms  │ $0      │ Mar 2024  │ ← Recommended
-│ openai-3-small    │ 91%     │ 95ms  │ $800    │ Feb 2024  │
-│ openai/ada-002    │ 87%     │ 120ms │ $2,400  │ Dec 2022  │ ← Current
-│ bge-large-en-v1.5 │ 86%     │ 67ms  │ $0      │ Oct 2023  │
-└───────────────────┴─────────┴───────┴─────────┴───────────┘
-
-Recommendation: Switch to mxbai-embed-large
-- 6% quality improvement
-- 49ms faster per query
-- Save $28,800/year
-```
-
-### Legal Document Analysis
-
-```
-Dataset: 10,000 legal contracts
-Detected: Legal domain content
-
-┏━━━━━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃ Model           ┃ Quality ┃ Why It Wins                  ┃
-┡━━━━━━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
-│ voyage-law-2    │ 96%     │ Trained on legal corpus      │ ← Recommended
-│ openai-3-large  │ 89%     │ Good general understanding   │
-│ bge-large       │ 82%     │ Misses legal nuances        │
-└─────────────────┴─────────┴──────────────────────────────┘
-
-Domain-specific model provides 7% accuracy boost
-```
-
----
-
-## Supported Models
-
-### Always Up-to-Date
-
-As of March 2024, we track 50+ models including:
-
-**General Purpose**
-- OpenAI (ada-002, text-embedding-3-*)
-- Cohere (embed-v3-*)
-- BGE family (small/base/large)
-- E5 family (small/base/large)
-- MiniLM variants
-- MPNet variants
-- mxbai embeddings
-
-**Domain Specific**
-- voyage-law-2 (legal)
-- voyage-code-2 (code)
-- voyage-finance-2 (finance)
-- PubMedBERT (medical)
-- scibert (scientific)
-
-**Multilingual**
-- Cohere multilingual
-- mE5 variants
-- XLM-RoBERTa based
-
-**New This Month**
-- mxbai-embed-large-v1
-- nomic-embed-text-v1.5
-- voyage-large-2
-
----
-
-## Why Continuous Evaluation Matters
-
-### Real Customer Story
-
-> "We deployed our RAG system in January with text-embedding-ada-002. Worked great.
->
-> In June, a customer mentioned their search seemed worse than a competitor's. We investigated—turned out voyage-2 had launched in March and understood our product catalog 30% better.
->
-> We'd been serving inferior results for 3 months and paying 5x more for embeddings. Never again."
-
-— CTO, E-commerce Platform
-
----
-
-## Installation
-
-### Python SDK
-
-```bash
-pip install polvo-eval
-```
-
-### Node.js SDK
-
-```bash
-npm install @polvo/eval
-```
-
-### REST API
-
-```bash
-curl -X POST https://api.usepolvo.com/v1/evaluate \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -F "file=@your_data.csv" \
-  -F "models=auto"
-```
-
----
-
-## Pricing
-
-**Free Tier**
-- 3 evaluations/month
-- Up to 1,000 documents
-- Email notifications
-
-**Pro** - $99/month
-- Unlimited evaluations
-- Up to 100,000 documents
-- Slack/webhook notifications
-- API access
-- A/B testing tools
-
-**Enterprise** - Custom
-- Unlimited everything
-- Custom model integration
-- On-premise deployment
-- SLA support
-
----
-
-## FAQ
-
-**Q: How is this different from MTEB?**
-A: MTEB tests on generic datasets. We test on YOUR data. The best model for Wikipedia might be terrible for your medical notes.
-
-**Q: How often do new models really launch?**
-A: Last month: 64 new embedding models on Hugging Face alone. The pace is accelerating.
-
-**Q: What if I've fine-tuned my model?**
-A: Upload it as a custom model. We'll alert when a new pre-trained model beats your fine-tuned one.
-
-**Q: Can I test private/proprietary models?**
-A: Yes, Enterprise plan supports custom model integration.
-
----
-
-## The Embedding Arms Race Is Real
-
-Don't get left behind. What was cutting-edge last quarter is now outdated.
-
-[Start Free Evaluation](https://usepolvo.com) • [View Live Demo](https://usepolvo.com/demo) • [Read the Docs](https://docs.usepolvo.com)
-
-Built by engineers who were tired of discovering better models existed... six months too late.
+Remember: The best API client is the one that stays out of your way until you need it.
