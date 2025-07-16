@@ -2,159 +2,141 @@
 
 **The missing layer between simple HTTP clients and enterprise service meshes**
 
+Polvo is a production-ready API integration toolkit available for Python and Node.js. It bridges the gap between basic HTTP wrappers (like `requests` in Python or `fetch`/Axios in Node.js) and complex infrastructure solutions, handling OAuth2, rate limiting, retries, and multi-tenancy with explicit, debuggable patterns.
+
 ## The Problem
 
-Every Python developer knows this progression:
+Developers in both Python and Node.js ecosystems face similar challenges when building robust API integrations:
 
-1. **Start with `requests`**: Works great for simple APIs
-2. **Add authentication**: Now you're managing tokens manually
-3. **Add retry logic**: Copy-paste that exponential backoff function again
-4. **Add rate limiting**: Hope your hand-rolled solution actually works
-5. **Add OAuth2**: Spend days debugging token refresh
-6. **Add multi-tenancy**: Rewrite everything
+1. **Start simple**: Use `requests` (Python) or `fetch`/Axios (Node.js) for basic calls.
+2. **Add authentication**: Manually manage tokens and headers.
+3. **Add retry logic**: Implement exponential backoff from scratch.
+4. **Add rate limiting**: Build custom throttlers that often fail under load.
+5. **Add OAuth2**: Debug token refresh cycles for days.
+6. **Add multi-tenancy**: Rewrite core logic for tenant isolation.
 
-By step 6, you've built a fragile, ad-hoc API client framework. We've been there. That's why we built Polvo.
+By this point, you've created a brittle, custom framework. We've experienced this in both languages—that's why Polvo exists as cross-platform libraries.
 
 ## Our Solution
 
-Polvo provides production patterns without the complexity:
+Polvo delivers production patterns without unnecessary complexity, with consistent APIs across languages:
 
+### Python
 ```python
 import polvo
 
-# Still simple for simple things
+# Simple module functions
 response = polvo.get('https://api.example.com/data')
 
-# But handles the hard stuff when you need it
+# Advanced session
 session = polvo.Session(
     auth=polvo.auth.oauth2(...),  # Automatic token refresh
-    retry=True,                    # Exponential backoff built-in
-    rate_limit='adaptive'          # Reads API headers
+    retry=True,                    # Exponential backoff
+    rate_limit='adaptive'          # Header-based adaptation
 )
 ```
+
+### Node.js
+```javascript
+import polvo from 'polvo';
+
+// Simple functions
+const response = await polvo.get('https://api.example.com/data');
+
+// Advanced session
+const session = polvo.create({
+    auth: polvo.auth.oauth2(...),  // Automatic token refresh
+    retry: true,                    // Exponential backoff
+    // Rate limiting coming soon; use custom for now
+});
+```
+
+Install via `pip install usepolvo` (Python) or `npm install polvo` (Node.js).
 
 ## Core Design Decisions
 
+Polvo's philosophy is shared across implementations, with language-appropriate adaptations.
+
 ### 1. **Module Functions First, Sessions Second**
 
-We follow Python's principle of progressive disclosure:
+Progressive disclosure for simplicity:
 
-```python
-# 90% of use cases - simple module functions
-data = polvo.get(url).json()
-
-# 10% of use cases - sessions for advanced features
-with polvo.Session() as session:
-    session.auth = polvo.auth.oauth2(...)
-    data = session.get(url).json()
-```
+- Python: Module functions for 90% of cases; sessions for advanced.
+- Node.js: Function calls for basics; configurable sessions for production.
 
 ### 2. **Explicit Token Storage**
 
-Security shouldn't be magic. You decide where tokens live:
+No magic—specify where tokens live for security and control:
 
-```python
-# You see exactly where tokens are stored
-oauth = polvo.auth.OAuth2(
-    client_id='id',
-    client_secret='secret',
-    token_url='https://auth.example.com/token',
-    token_cache='~/.myapp/tokens.json',  # Explicit path
-    cache_encryption=True                 # Explicit encryption
-)
-```
-
-No hidden files. No surprise locations. No "where did my tokens go?"
+- Both: File, memory, or custom storage; encryption by default.
+- Python example: `token_cache='~/.myapp/tokens.json', cache_encryption=True`.
+- Node.js example: `tokenCache: '~/.myapp/tokens.json', cacheEncryption: true`.
 
 ### 3. **Failures Are Explicit**
 
-When things go wrong (and they will), you need clarity:
+Clear, actionable errors:
 
-```python
-try:
-    response = polvo.get(url)
-except polvo.RateLimitError as e:
-    print(f"Rate limited. Retry after: {e.retry_after}")
-except polvo.TokenRefreshError as e:
-    print(f"OAuth2 refresh failed: {e.reason}")
-```
+- Python: `polvo.RateLimitError`, `polvo.TokenRefreshError`.
+- Node.js: `PolvoHTTPError`, `TokenRefreshError` with `reason` and `config`.
 
 ### 4. **Composable, Not Configurable**
 
-Instead of a thousand configuration options, we provide composable components:
+Build what you need with defaults for production:
 
-```python
-# Compose the behavior you need
-session = polvo.Session(
-    auth=polvo.auth.bearer('token'),
-    retry=polvo.retry.ExponentialBackoff(max_attempts=5),
-    rate_limit=polvo.ratelimit.TokenBucket(rate=10)
-)
-
-# Or use smart defaults
-session = polvo.Session(retry=True, rate_limit='adaptive')
-```
+- Python: Compose retry/rate_limit strategies.
+- Node.js: Configure sessions; composable auth handlers.
 
 ## What We Do Differently
 
 ### OAuth2 That Actually Works
 
-Most libraries treat OAuth2 as "just another auth method". We treat it as the complex beast it is:
+Treated as a first-class citizen in both libraries:
 
-- **Automatic refresh**: Tokens refresh before expiration, not after failure
-- **Thread-safe**: No race conditions during refresh
-- **Multi-tenant**: Built-in support for SaaS applications
-- **Resilient**: Graceful degradation when token storage fails
+- Automatic proactive refresh.
+- Thread-safe (Python) / Promise-safe (Node.js).
+- Multi-tenant support.
+- Graceful fallback on storage issues.
 
 ### Adaptive Rate Limiting
 
-We don't just respect rate limits, we adapt to them:
+Respect and adapt to API headers:
 
-```python
-# Polvo reads headers like X-RateLimit-Remaining
-session = polvo.Session(rate_limit='adaptive')
-
-# Makes requests at optimal rate
-for item in items:
-    response = session.post('api/process', json=item)
-    # Automatically slows down as limit approaches
-```
+- Python: Built-in 'adaptive' mode.
+- Node.js: Header parsing with manual throttling (adaptive in progress).
 
 ### Production Defaults
 
-Our defaults assume you're running in production:
-
-- ✅ Encryption on by default for token storage
-- ✅ Retries with exponential backoff and jitter
-- ✅ Timeouts configured (no infinite hangs)
-- ✅ Circuit breakers for cascading failures
-- ✅ Structured logging ready
+- Encrypted storage.
+- Retries with backoff/jitter.
+- Timeouts to prevent hangs.
+- Circuit breakers (Python; planned for Node.js).
 
 ## When To Use Polvo
 
 ### ✅ Use Polvo when:
 
-- You're integrating with REST APIs that use OAuth2
-- You need reliable retry and rate limiting logic
-- You're building multi-tenant SaaS applications
-- You want `requests` simplicity with production patterns
-- You value explicit, debuggable behavior
+- Integrating REST APIs with OAuth2.
+- Needing reliable retries/rate limiting.
+- Building multi-tenant apps.
+- Valuing `requests`/Axios simplicity with production features.
+- Prioritizing explicit behavior.
 
 ### ❌ Don't use Polvo when:
 
-- You're making a few simple API calls (just use `requests`)
-- You need a full service mesh (use Istio/Linkerd)
-- You're building high-frequency trading systems
-- You need GraphQL/gRPC/WebSocket support (not our focus)
+- Simple calls only (use `requests`/fetch).
+- Full service mesh needed (Istio/Linkerd).
+- High-frequency trading.
+- GraphQL/gRPC/WebSockets (not focused).
+
+For Python: If you love `requests` but need more.
+For Node.js: If Axios falls short on auth/resilience.
 
 ## Real-World Example
 
-Here's how a real team uses Polvo in production:
-
+### Python
 ```python
 # config.py
 def create_api_client():
-    """Create production-ready API client for Acme API."""
     return polvo.Session(
         base_url='https://api.acme.com',
         auth=polvo.auth.OAuth2(
@@ -165,59 +147,72 @@ def create_api_client():
             token_cache=f'{Config.DATA_DIR}/acme_tokens.json',
             cache_encryption=True
         ),
-        retry=polvo.retry.ExponentialBackoff(
-            max_attempts=3,
-            retry_on=[500, 502, 503, 504, 429]
-        ),
-        rate_limit=polvo.ratelimit.TokenBucket(
-            rate=100,  # 100 requests per second
-            capacity=500  # Burst of 500
-        ),
-        timeout=30,
-        circuit_breaker={
-            'failure_threshold': 5,
-            'recovery_timeout': 60
-        }
+        retry=polvo.retry.ExponentialBackoff(max_attempts=3),
+        rate_limit=polvo.ratelimit.TokenBucket(rate=100, capacity=500),
+        timeout=30
     )
 
 # worker.py
 def process_customer_data(customer_id):
-    """Process data for a specific customer."""
     with api_client() as api:
-        # Set tenant context
         api.set_tenant(customer_id)
-        
-        # Fetch data - all the complexity is handled
         orders = api.get('orders').json()
-        
         for order in orders:
-            # Process each order
             result = process_order(order)
-            
-            # Update - automatic retry on failure
             api.patch(f'orders/{order["id"]}', json=result)
+```
+
+### Node.js
+```javascript
+// config.js
+function createApiClient() {
+    return polvo.create({
+        baseURL: 'https://api.acme.com',
+        auth: polvo.auth.oauth2({
+            flow: 'client_credentials',
+            clientId: process.env.ACME_CLIENT_ID,
+            clientSecret: process.env.ACME_CLIENT_SECRET,
+            tokenUrl: 'https://auth.acme.com/oauth/token',
+            tokenCache: `${Config.DATA_DIR}/acme_tokens.json`,
+            cacheEncryption: true
+        }),
+        retry: { maxAttempts: 3 },
+        timeout: 30000
+    });
+}
+
+// worker.js
+async function processCustomerData(customerId) {
+    const api = createApiClient();
+    // Tenant support in development
+    const orders = (await api.get('orders')).data;
+    for (const order of orders) {
+        const result = processOrder(order);
+        await api.patch(`orders/${order.id}`, result);
+    }
+}
 ```
 
 ## Philosophy
 
-1. **Simple things should be simple**: One-line API calls when that's all you need
-2. **Complex things should be possible**: Full control when you need it
-3. **Explicit is better than implicit**: You should know where your tokens are
-4. **Errors should be actionable**: Clear exceptions with solutions
-5. **Production is the default**: Secure, reliable, observable out of the box
+1. **Simple things should be simple**: One-line calls.
+2. **Complex things should be possible**: Full control.
+3. **Explicit is better than implicit**: Know your token locations.
+4. **Errors should be actionable**: Clear fixes.
+5. **Production is the default**: Secure by design.
 
 ## The Name
 
-"Polvo" means octopus in Portuguese. Like an octopus with multiple tentacles reaching out to different services, Polvo helps you integrate with multiple APIs.
+"Polvo" means octopus in Portuguese—like tentacles reaching multiple services.
 
 ## License
 
-MIT License. Use it, fork it, sell it – just don't blame us if it breaks.
+MIT. Use, fork, or sell—your risk.
 
 ---
 
 **Still not convinced?**
 
-Try this: Take your most complex API integration. The one with OAuth2, retry logic, rate limiting, and multi-tenant support. Replace it with Polvo. We bet you'll delete more code than you add.
+Replace your complex integration with Polvo in Python or Node.js. You'll likely delete more code than add.
 
-If not, open an issue. We'd love to know what we missed.
+Open an issue in the relevant repo: [Python](https://github.com/usepolvo/polvo-python) or [Node.js](https://github.com/usepolvo/polvo-js). We'd love feedback.
