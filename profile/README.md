@@ -208,7 +208,7 @@ def process_customer_data(customer_id):
 
 ## The Name
 
-"Polvo" means octopus in Portuguese. Like an octopus with multiple tentacles reaching out to different services, Polvo helps you integrate with multiple APIs. But unlike v1's over-engineered "Brain/Tentacles" architecture, v2 keeps it simple.
+"Polvo" means octopus in Portuguese. Like an octopus with multiple tentacles reaching out to different services, Polvo helps you integrate with multiple APIs.
 
 ## License
 
